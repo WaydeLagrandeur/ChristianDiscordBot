@@ -4,6 +4,8 @@ const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]});
 
 const prefix = '!';
 
+const token = require("./token");
+
 client.once('ready', () => {
     console.log('CultBot is online!');
 });
@@ -103,4 +105,4 @@ client.on('message', message => {
     }
 })
 
-client.login('OTAzODM1ODA0ODY1MDE5OTE0.YXywsA.SC5xmRLfZJPZI734acLcLWSC8TY');
+client.login(token);
