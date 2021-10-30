@@ -106,7 +106,7 @@ client.on('message', message => {
 })
 
 
-fs.readFile('./token.txt', 'utf8', function(err, data) {
+fs.readFile('./token', 'utf8', function(err, data) {
     if(err) throw err;
     client.login(data);
 });
