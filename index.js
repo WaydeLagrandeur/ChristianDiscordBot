@@ -4,7 +4,7 @@ const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES"]});
 
 const prefix = '!';
 
-const token = require("./token");
+let fs = require('fs');
 
 client.once('ready', () => {
     console.log('CultBot is online!');
@@ -105,4 +105,8 @@ client.on('message', message => {
     }
 })
 
-client.login(token);
+
+fs.readFile('./token.txt', 'utf8', function(err, data) {
+    if(err) throw err;
+    client.login(data);
+});
