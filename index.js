@@ -58,7 +58,7 @@ client.on('message', message => {
     const command = args.shift().toLowerCase();
 
     if(command === 'praise') {
-        message.channel.send("Praise Jesus!");
+        message.channel.send("Praise the Lord!");
     }
 });
         
