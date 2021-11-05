@@ -55,8 +55,8 @@ client.on('message', message => {
     const words = messageContent.split(' ');
     let count = 0;
     words.forEach((v, i) => {
-        if(badWords.indexOf(v) > -1) {
-            const idx = badWords.indexOf(v);
+        const idx = badWords.indexOf(v);
+        if(idx > -1) {
             words[i] = goodWords[idx];
             bBadWords = true;
             count++;
@@ -67,7 +67,7 @@ client.on('message', message => {
 
     if(bBadWords) {
         message.channel.send('That is a bad word ' + message.author.username + "! \nInstead, try saying \"" + newMessage + "\"");
-        UpdateCountDB(message.author.username, message.channel.id, count, 'sin');
+        UpdateCountDB(message.author.username, message.channel.id, 'sin', count);
     }
 });
 
