@@ -54,22 +54,53 @@ client.on('message', message => {
     const messageContent = message.content.toLowerCase();
     const words = messageContent.split(' ');
     let count = 0;
-    words.forEach((v, i) => {
-        const idx = badWords.indexOf(v);
-        if(idx > -1) {
-            words[i] = goodWords[idx];
-            bBadWords = true;
-            count++;
+
+    if(!message.author.bot) {
+
+        for(let i = 0; i < words.length; i++) {
+            for(let j = 0; j < badWords.length; j++) {
+                if(words[i].includes(badWords[j])) {
+                    words[i] = words[i].replace(badWords[j], goodWords[j]);
+                    bBadWords = true;
+                    count++;
+                }
+            }
         }
+
+        let newMessage = words.join(' ');
+
+        if(bBadWords) {
+            message.channel.send('That is a bad word ' + message.author.username + "! \nInstead, try saying \"" + newMessage + "\"");
+            UpdateCountDB(message.author.username, message.channel.id, 'sin', count);
+        }
+
+    }
+//    words.forEach((v, i) => {
+
+        // if(words[v].includes(badWords[i])) {
+        //     words[v].replaceAll(badWords[i], goodWords[i]);
+        //     //words[v] = goodWords[i];
+        //     bBadWords = true;
+        //     count++;
+        // }
+
+        // const idx = badWords.indexOf(v);
+        
+        // if(words[i].includes(badWords[i])) {
+        //     words[i].replaceAll(badWords[i])
+        // }
+
+        
+
+        // if(idx > -1) {
+        //     words[i] = goodWords[idx];
+        //     bBadWords = true;
+        //     count++;
+        // }
     }); 
 
-    let newMessage = words.join(' ');
-
-    if(bBadWords) {
-        message.channel.send('That is a bad word ' + message.author.username + "! \nInstead, try saying \"" + newMessage + "\"");
-        UpdateCountDB(message.author.username, message.channel.id, 'sin', count);
-    }
-});
+    
+//});
 
 async function createUser(username, channel) {
 
