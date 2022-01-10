@@ -4,6 +4,7 @@
   "description": "Discord Bot",
   "main": "index.js",
   "scripts": {
+    "start": "index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Wayde Lagrandeur",
@@ -11,6 +12,7 @@
   "dependencies": {
     "discord.js": "^13.3.0",
     "node-fetch": "^2.6.6",
+    "node-schedule": "^2.0.0",
     "sequelize": "^6.9.0",
     "sqlite3": "^5.0.2"
   }
