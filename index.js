@@ -219,14 +219,9 @@ client.on('message', async message => {
 
                 UpdateCountDB(user.id, tag, message.guild.id, 'thoughtsAndPrayers')
                 UpdateCountDB(message.author.id, message.author.username, message.guild.id, 'pray')
-
-                //Below is to hopefully reduce the chance of the bot deleting a non-prayer message
-                if(message.channel.lastMessage.author.id === message.author.id) {
-                    message.channel.lastMessage.delete();
+               
                     message.channel.send(message.author.username + " has sent " + tag + " a Thought and Prayer!")
-                } else {
-                    message.channel.send(message.author.username + " has sent " + tag + " a Thought and Prayer!")
-                }        
+                      
 
             } else {
                 message.channel.send("error")
