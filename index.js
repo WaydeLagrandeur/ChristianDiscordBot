@@ -11,6 +11,7 @@ const prefix = '!';
 
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]});
 
+//To any future employers faint of heart, please do NOT read the next line
 const badWords = ['fuck', 'shit', 'cunt', 'cock', 'dick', 'bitch', 'bastard', 'damn', 'dammit', 'ass', 'hell', 'pussy', 'whore', 'slut', 'piss', 'tit', 'cum', 'fag'];
 const goodWords = ['frick', 'crap', 'good fellow', 'penis', 'penis', 'female dog', 'child of unwed parents', 'darn', 'darn it', 'bum', 'heck', 'vagina', 'promiscuous woman', 'promiscuous woman', 'pee', 'breast', 'semen', 'bundle of twigs'];
 
@@ -35,18 +36,6 @@ const User = sequelize.define('User', {
         type: Sequelize.INTEGER,
         defaultValue: 0
     },
-    // weeklySinCount: {
-    //     type: Sequelize.INTEGER,
-    //     defaultValue: 0
-    // },
-    // monthlySinCount: {
-    //     type: Sequelize.INTEGER,
-    //     defaultValue: 0
-    // },
-    // yearlySinCount: {
-    //     type: Sequelize.INTEGER,
-    //     defaultValue: 0
-    // },
     totalSinCount: {
         type: Sequelize.INTEGER,
         defaultValue: 0
@@ -73,26 +62,6 @@ client.once('ready', async () => {
      User.sync();
     //{ force: true } USE THIS INSIDE USER.SYNC() TO RESET DATABASE, PROCEED WITH CAUTION
 });
-
-client.on("voiceStateUpdate", (oldVoiceState, newVoiceState) => { // Listening to the voiceStateUpdate event
-    if (newVoiceState.channel) { // The member connected to a channel.
-        console.log("Hello There");
-    } else if (oldVoiceState.channel) { // The member disconnected from a channel.
-        console.log("Oh no");
-    };
-});
-
-// client.on("ready", () => {
-//     const channel = client.channels.cache.get("905232633200525426");
-//     if (!channel) return console.error("The channel does not exist!");
-//     channel.join().then(connection => {
-//       // Yay, it worked!
-//       console.log("Successfully connected.");
-//     }).catch(e => {
-//       // Oh no, it errored! Let's log it to console :)
-//       console.error(e + " LOL");
-//     });
-//   });
 
 client.on('message', message => {   
     let bBadWords = false;
@@ -165,9 +134,6 @@ async function UpdateCountDB(userID, userName, guildID, type, count) {
 
     if(user) {
         if(type === 'sin') {
-            //user.increment('weeklySinCount', {by: count});
-            // user.increment('monthlySinCount', {by: count});
-            // user.increment('yearlySinCount', {by: count});
             user.increment('totalSinCount', {by: count});
         }
         if(type === 'praise') {
@@ -282,36 +248,7 @@ client.on('message', async message => {
             passage.replaceAll("<b>", "").replaceAll("</b>", "");
 
             const embed = new Discord.MessageEmbed().setTitle(passageLocation).setDescription(passage).setFooter(sendOff);
-            message.channel.send({embeds: [embed]});
-
-            //console.log("Hello");
-
-            // try {
-            //     const usersInChannel = Discord.VoiceChannel.members.id;
-            //     console.log("Got list of users");
-            // } catch {
-            //     console.log("Could not get list of users");
-            // }
-
-            
-
-            // for(let i = 0; i < usersInChannel.length; i++) {
-            //     console.log(usersInChannel[i]);
-            // }
-
-            // let voiceMembers = Discord.VoiceChannel()
-            
-
-            // if (message.author.id.voice.channel) { // Checking if the member is connected to a VoiceChannel.
-            //     // The member is connected to a voice channel.
-            //     // https://discord.js.org/#/docs/main/stable/class/VoiceState
-            //     message.channel.send("User is in a voice channel");
-            //     console.log("User in a voice channel");
-            // } else {
-            //     // The member is not connected to a voice channel.
-            //     message.channel.send("User not found in a voice channel" + members.voice.channel);
-            //     console.log("Couldn't find user");
-            // };
+            message.channel.send({embeds: [embed]})
 
         } catch {
             console.log("Error");
