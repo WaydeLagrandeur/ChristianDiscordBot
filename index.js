@@ -6,14 +6,17 @@ const fs = require('fs');
 const path = require('path');
 const { Console } = require('console');
 const schedule = require('node-schedule');
-
 const prefix = '!';
 
 const client = new Discord.Client({intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]});
 
 //To any future employers faint of heart, please do NOT read the next line
-const badWords = ['fuck', 'shit', 'cunt', 'cock', 'dick', 'bitch', 'bastard', 'damn', 'dammit', 'ass', 'hell', 'pussy', 'whore', 'slut', 'piss', 'tit', 'cum', 'fag'];
-const goodWords = ['frick', 'crap', 'good fellow', 'penis', 'penis', 'female dog', 'child of unwed parents', 'darn', 'darn it', 'bum', 'heck', 'vagina', 'promiscuous woman', 'promiscuous woman', 'pee', 'breast', 'semen', 'bundle of twigs'];
+const badWords = ['fuck', 'shit', 'cunt', 'cock', 'dick', 'bitch', 'bastard', 'damn', 'dammit', 'dam', 'ass', 'hell', 'pussy', 'whore', 'slut', 'piss', 'tit', 'cum', 'fag'];
+const goodWords = ['frick', 'crap', 'good fellow', 'penis', 'penis', 'female dog', 'child of unwed parents', 'darn', 'darn it', 'darn', 'bum', 'heck', 'vagina', 'promiscuous woman', 'promiscuous woman', 'pee', 'breast', 'semen', 'bundle of twigs'];
+const bibleBooks = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy' , 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther',
+'Job', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi',
+'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter',
+'1 John', '2 John', '3 John', 'Jude', 'Revelation']
 
 const sequelize = new Sequelize('database', 'user', 'password', {
     host: 'localhost',
@@ -199,7 +202,16 @@ client.on('message', async message => {
     }
 
     if(command === 'stats') {
-        const user = await User.findOne({ where: { userID: message.author.id, guildID: message.guild.id }});
+
+        let targetMember = message.mentions.members.first();
+        let user;
+        if(targetMember) {
+            user = await User.findOne({ where: { userID: targetMember.id, guildID: message.guild.id }});
+            //console.log("User found!")
+        } else {
+            user = await User.findOne({ where: { userID: message.author.id, guildID: message.guild.id }});
+            //console.log("User not found")
+        }
 
         if(user) {
 
@@ -207,12 +219,43 @@ client.on('message', async message => {
 
             level = Math.floor(level / 5);
 
+            //Below is to determine the rank of the stats
+            let rank;
+
+            if(level >= 0 && level <= 9) {
+                rank = " Prayer Peasant"
+            }
+            if(level >= 10 && level <= 49) {
+                rank = " Prayer Warrior"
+            }
+            if(level > 49) {
+                rank = " Apostle"
+            }
+
+            if(level < 0 && level >= -9) {
+                rank = " Sinner"
+            }
+            if(level < -9 && level >= -49) {
+                rank = " Heck Spawn"
+            }
+            if(level < -50) {
+                rank = " Demon"
+            }
+
+            let name = user.userName
+            //cycle through bad words, compare them to user name
+            for(let i = 0; i < badWords.length; i++) {
+                if(name.includes(badWords[i])) {
+                    name = name.replaceAll(badWords[i], goodWords[i])
+                }
+            }
+
             let description = "Curse Count: " + user.totalSinCount +
                 "\nPraise Count: " + user.praiseCount +
                 "\nVerses Read: " + user.versesRead +
                 "\nThoughts and Prayers: " + user.thoughtsAndPrayersCount; 
 
-            const embed = new Discord.MessageEmbed().setTitle("Stats for " + message.author.username + "\nLevel " + level + " Prayer Warrior").setDescription(description); 
+            const embed = new Discord.MessageEmbed().setTitle("Stats for " + name + "\nLevel " + level + rank).setDescription(description); 
 
             message.channel.send({embeds: [embed]});            
 
@@ -238,8 +281,8 @@ client.on('message', async message => {
     if(command === 'verse') {
 
         try {
-            const bibleVerse = await fetch('http://labs.bible.org/api/?passage=random&type=json').then(response => response.json());
-            const obj = JSON.stringify(bibleVerse, null, 2).toString().split('"');  
+            let bibleVerse = await fetch('http://labs.bible.org/api/?passage=random&type=json').then(response => response.json());
+            let obj = JSON.stringify(bibleVerse, null, 2).toString().split('"');  
 
             let passageLocation = obj[3] + " " + obj[7] + ":" + obj[11]; 
             let passage = obj[15]; 
@@ -250,13 +293,72 @@ client.on('message', async message => {
             const embed = new Discord.MessageEmbed().setTitle(passageLocation).setDescription(passage).setFooter(sendOff);
             message.channel.send({embeds: [embed]})
 
+            UpdateCountDB(message.author.id, message.author.username, message.guild.id, 'verse');
+
         } catch {
             console.log("Error");
         }
         
-        UpdateCountDB(message.author.id, message.author.username, message.guild.id, 'verse');
+        
+    }
+
+    if(command === 'quiz') {
+        try {
+            let bibleVerse = await fetch('http://labs.bible.org/api/?passage=random&type=json').then(response => response.json());
+            let obj = JSON.stringify(bibleVerse, null, 2).toString().split('"');  
+
+            let books = [bibleBooks[Math.floor(Math.random() * 65)], bibleBooks[Math.floor(Math.random() * 65)], bibleBooks[Math.floor(Math.random() * 65)], obj[3]]
+            shuffleArray(books)
+
+            if(hasDuplicates(books)) {
+                console.log("DUPLICATE")
+            }
+            
+            let passageLocation = "________________ " + obj[7] + ":" + obj[11]; 
+            let passage = obj[15] 
+            let sendOff = "You have 60 seconds to guess which book of the Bible the above passage is from!"
+
+            passage.replaceAll("<b>", "").replaceAll("</b>", "");
+
+
+            let options = "\n\n\tA. " + books[0].toString() + "\tB. " + books[1].toString() + "\tC. " + books[2].toString() + "\tD. " + books[3].toString()
+
+            const embed = new Discord.MessageEmbed().setTitle(passageLocation).setDescription(passage + options).setFooter(sendOff)
+            await message.channel.send({embeds: [embed]})
+                .then(m => m.react('🇦'))
+                .then(m => m.message.react('🇧'))
+                .then(m => m.message.react('🇨'))
+                .then(m => m.message.react('🇩'))
+		    //message.react('😄');
+            
+            setTimeout(function(){
+                message.channel.send("Times up! The correct answer was " + obj[3].toString())
+                console.log("DING DING DING")    
+            }, 15000)
+
+        } catch {
+            console.log("Error");
+        }
     }
 });
+
+function hasDuplicates(array) {
+    return (new Set(array)).size !== array.length;
+}
+
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+    
+        // Generate random number
+        var j = Math.floor(Math.random() * (i + 1));
+                    
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+        
+    return array;
+ }
 
 fs.readFile('./token', 'utf8', function(err, data) {
     if(err) throw err;
